@@ -5,6 +5,7 @@ namespace App\Helper;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Validation\Validator;
 use Throwable;
+use Illuminate\Support\Str;
 
 class CustomResponse implements Arrayable
 {
@@ -55,6 +56,9 @@ class CustomResponse implements Arrayable
     // exception capturée entre ici...
     static function buildExceptionResponse(Throwable $throwable)
     {
+        if(Str::contains($throwable->getMessage(), 'SQLSTATE')) {
+            return new CustomResponse("Erreur SQL, contactez l'administrateur...", true, false, true);
+        }
         return new CustomResponse($throwable->getMessage(), true, false, true);
     }
 }

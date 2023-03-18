@@ -1,6 +1,8 @@
 <?php
 
 use App\Helper\CustomResponse;
+use App\Http\Controllers\TacheController;
+use App\Models\Tache;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,7 @@ use Illuminate\Support\Facades\Validator;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return CustomResponse::buildCorrectResponse($request->user());
+    return CustomResponse::buildCorrectResponse($request->user()->loadCount('taches', 'tacheTerminees', 'tacheEnCours'));
 });
 
 Route::post('user', function (Request $request) {
@@ -63,3 +65,15 @@ Route::post('login', function (Request $request) {
     }
     return CustomResponse::buildCustomErrorResponse("Auth échouée !");
 });
+
+
+Route::get('tache/{tache:uid}', [TacheController::class, 'show'])->middleware('auth:sanctum');
+Route::put('tache/{tache:uid}', [TacheController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('tache/{tache:uid}', [TacheController::class, 'destroy'])->middleware('auth:sanctum');
+Route::resource('tache', TacheController::class, [
+    'only' => ['index', 'store']
+])->middleware('auth:sanctum');
+
+Route::get('generate-random-tache/{nombre}', function ($nombre) {
+    Tache::factory($nombre)->create();
+})->middleware('auth:sanctum');
